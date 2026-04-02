@@ -27,9 +27,6 @@ jobs:
         env:
           BASE_PATH: '/maccabi-pharm-stock'
 
-      - name: Create index.html for root URL
-        run: cp build/404.html build/index.html
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:

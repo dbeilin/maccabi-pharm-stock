@@ -37,9 +37,9 @@
 		--glass-blur: blur(16px);
 	}
 
-	*,
-	*::before,
-	*::after {
+	:global(*),
+	:global(*::before),
+	:global(*::after) {
 		box-sizing: border-box;
 		margin: 0;
 		padding: 0;
@@ -53,6 +53,7 @@
 		overflow: hidden;
 		height: 100vh;
 		width: 100vw;
+		margin: 0;
 	}
 
 	:global(.leaflet-container) {
