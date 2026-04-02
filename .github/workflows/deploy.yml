@@ -24,6 +24,8 @@ jobs:
 
       - run: bun install
       - run: bun run build
+        env:
+          BASE_PATH: '/maccabi-pharm-stock'
 
       - name: Create index.html for root URL
         run: cp build/404.html build/index.html

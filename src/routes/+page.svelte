@@ -7,7 +7,6 @@
 	import PharmacyList from '$lib/components/PharmacyList.svelte';
 	import StatusBar from '$lib/components/StatusBar.svelte';
 
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { searchPharmacies } from '$lib/api/search';
 	import { CITIES, getCityCode } from '$lib/api/cities';
@@ -76,8 +75,8 @@
 		if (_c.length) params.set('cities', _c.join(','));
 
 		const qs = params.toString();
-		const url = qs ? `?${qs}` : page.url.pathname;
-		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
+		const url = qs ? `?${qs}` : location.pathname;
+		history.replaceState(history.state, '', url);
 	});
 
 	function addDrug(drug: Drug) {

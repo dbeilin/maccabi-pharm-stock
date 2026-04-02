@@ -1,7 +1,5 @@
 import adapter from '@sveltejs/adapter-static';
 
-const dev = process.argv.includes('dev');
-
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	compilerOptions: {
@@ -12,10 +10,10 @@ const config = {
 			pages: 'build',
 			assets: 'build',
 			fallback: '404.html',
-		 strict: false
+			strict: false
 		}),
 		paths: {
-			base: dev ? '' : '/maccabi-pharm-stock'
+			base: process.env.BASE_PATH ?? ''
 		},
 		prerender: {
 			entries: ['/']
