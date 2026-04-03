@@ -1,6 +1,20 @@
 import type { ApiPharmacyItem } from '$lib/types/api';
 import type { Pharmacy, StockStatus } from '$lib/types/pharmacy';
 
+export const STOCK_COLORS: Record<StockStatus, string> = {
+	in: '#2D9F4C',
+	few: '#D4930D',
+	out: '#C93B3B',
+	unknown: '#8E8E8E'
+};
+
+export const STOCK_LABELS: Record<StockStatus, string> = {
+	in: 'במלאי',
+	few: 'מלאי חלקי',
+	out: 'אין במלאי',
+	unknown: 'לא ידוע'
+};
+
 export function normalizePharmacy(item: ApiPharmacyItem): Pharmacy {
 	return {
 		name: item.MACABI_BRUNCH_NAME || item.SERVICE_NAME || '',
@@ -21,11 +35,11 @@ export function normalizePharmacy(item: ApiPharmacyItem): Pharmacy {
 }
 
 export function worstStockColor(p: Pharmacy): string {
-	if (!p.total) return '#8E8E8E';
-	if (p.notStock.length > 0) return '#C93B3B';
-	if (p.fewStock.length > 0) return '#D4930D';
-	if (p.inStock.length > 0) return '#2D9F4C';
-	return '#8E8E8E';
+	if (!p.total) return STOCK_COLORS.unknown;
+	if (p.notStock.length > 0) return STOCK_COLORS.out;
+	if (p.fewStock.length > 0) return STOCK_COLORS.few;
+	if (p.inStock.length > 0) return STOCK_COLORS.in;
+	return STOCK_COLORS.unknown;
 }
 
 export function drugStockStatus(p: Pharmacy, largoCode: string): StockStatus {

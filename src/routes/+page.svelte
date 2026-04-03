@@ -6,6 +6,7 @@
 	import MapView from '$lib/components/MapView.svelte';
 	import PharmacyList from '$lib/components/PharmacyList.svelte';
 	import StatusBar from '$lib/components/StatusBar.svelte';
+	import Legend from '$lib/components/Legend.svelte';
 
 	import { page } from '$app/state';
 	import { searchPharmacies } from '$lib/api/search';
@@ -14,9 +15,9 @@
 	import type { Drug, Pharmacy, StatusMessage } from '$lib/types/pharmacy';
 	import type { CityEntry } from '$lib/types/city';
 
-	let selectedDrugs = $state<Drug[]>([]);
+	let selectedDrugs = $state.raw<Drug[]>([]);
 	let selectedCityNames = $state<string[]>([]);
-	let pharmacies = $state<Pharmacy[]>([]);
+	let pharmacies = $state.raw<Pharmacy[]>([]);
 	let status = $state<StatusMessage>({
 		message: 'הקלד שם תרופה, בחר מהרשימה, ולחץ חפש',
 		type: ''
@@ -156,7 +157,7 @@
 	}
 </script>
 
-<div class="app-shell">
+<div class="app-shell" id="main-content">
 	<div class="map-area">
 		<MapView
 			{pharmacies}
@@ -215,17 +216,26 @@
 			class="view-toggle"
 			type="button"
 			onclick={() => (viewMode = viewMode === 'map' ? 'list' : 'map')}
+			aria-label={viewMode === 'map' ? 'הצג רשימה' : 'הצג מפה'}
 		>
-			{viewMode === 'map' ? `רשימה (${pharmacies.length})` : 'מפה'}
+			{#if viewMode === 'map'}
+				<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+				רשימה ({pharmacies.length})
+			{:else}
+				<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+				מפה
+			{/if}
 		</button>
 	{/if}
 
-	<div class="sidebar-overlay" class:list-mode={viewMode === 'list'} style:--controls-h="{controlsHeight}px">
+	<div class="sidebar-overlay {viewMode === 'list' ? 'list-mode' : ''}" style:--controls-h="{controlsHeight}px">
 		<div class="sidebar-content">
+			<Legend visible={pharmacies.length > 0} />
 			<PharmacyList
 				{pharmacies}
 				selectedDrugs={selectedDrugs}
 				activeIndex={activeIndex}
+				{isLoading}
 				onCardClick={handleCardClick}
 			/>
 		</div>
@@ -278,8 +288,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		min-width: var(--min-touch);
+		min-height: var(--min-touch);
 		color: rgba(255, 255, 255, 0.85);
-		transition: color 0.15s;
+		transition: color var(--transition-fast);
 	}
 
 	.navbar-gh:hover {
@@ -325,7 +337,8 @@
 	}
 
 	.search-btn {
-		padding: 9px 22px;
+		padding: 10px 24px;
+		min-height: var(--min-touch);
 		background: var(--color-primary);
 		color: white;
 		border: none;
@@ -334,7 +347,7 @@
 		font-size: 0.9rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: background 0.2s, transform 0.1s;
+		transition: background var(--transition-normal), transform 0.1s;
 		white-space: nowrap;
 	}
 
@@ -352,7 +365,8 @@
 	}
 
 	.clear-btn {
-		padding: 9px 14px;
+		padding: 10px 16px;
+		min-height: var(--min-touch);
 		background: transparent;
 		color: var(--color-text-muted);
 		border: 1px solid var(--color-border);
@@ -360,7 +374,7 @@
 		font-family: var(--font-body);
 		font-size: 0.85rem;
 		cursor: pointer;
-		transition: background 0.15s;
+		transition: background var(--transition-fast);
 	}
 
 	.clear-btn:hover {
@@ -397,7 +411,7 @@
 	@media (max-width: 767px) {
 		.controls-row {
 			padding: 8px 12px;
-			gap: 6px;
+			gap: var(--gap-touch);
 		}
 
 		.ctrl-drugs {
@@ -406,7 +420,9 @@
 		}
 
 		.view-toggle {
-			display: block;
+			display: flex;
+			align-items: center;
+			gap: 6px;
 			position: fixed;
 			bottom: 24px;
 			left: 50%;
@@ -416,13 +432,18 @@
 			color: white;
 			border: none;
 			border-radius: 24px;
-			padding: 12px 28px;
+			padding: 14px 32px;
+			min-height: var(--min-touch);
 			font-family: var(--font-body);
-			font-size: 0.95rem;
+			font-size: 1rem;
 			font-weight: 600;
 			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 			cursor: pointer;
 			white-space: nowrap;
+		}
+
+		.view-toggle:hover {
+			background: var(--color-primary-dark);
 		}
 
 		.sidebar-overlay {
@@ -432,15 +453,23 @@
 			right: 0;
 			bottom: 0;
 			width: 100%;
-			display: none;
+			display: flex;
 			flex-direction: column;
-			transform: none;
 			border-radius: 0;
 			z-index: 1000;
+			transform: translateY(100%);
+			opacity: 0;
+			pointer-events: none;
+			visibility: hidden;
+			transition: transform var(--transition-normal), opacity var(--transition-normal), visibility 0s var(--transition-normal);
 		}
 
 		.sidebar-overlay.list-mode {
-			display: flex;
+			transform: translateY(0);
+			opacity: 1;
+			pointer-events: auto;
+			visibility: visible;
+			transition: transform var(--transition-normal), opacity var(--transition-normal), visibility 0s 0s;
 		}
 
 		.sidebar-content {

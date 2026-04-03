@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Pharmacy, Drug } from '$lib/types/pharmacy';
-	import { worstStockColor, drugStockStatus } from '$lib/utils/normalize';
+	import { worstStockColor, drugStockStatus, STOCK_COLORS, STOCK_LABELS } from '$lib/utils/normalize';
 	import { esc } from '$lib/utils/esc';
 
 	let {
@@ -89,30 +89,24 @@
 		}
 	});
 
+	const popupLabels: Record<string, string> = {
+		in: 'במלאי',
+		few: 'חלקי',
+		out: 'אין',
+		unknown: '?'
+	};
+
 	function buildPopup(p: Pharmacy, drugs: Drug[]): string {
 		const addr = [p.street, p.houseNum, p.city].filter(Boolean).join(' ');
 		const phone = p.phones.length
 			? `<div class="popup-phone">${p.phones.map((ph) => esc(ph)).join(', ')}</div>`
 			: '';
 
-		const statusColors: Record<string, string> = {
-			in: '#2D9F4C',
-			few: '#D4930D',
-			out: '#C93B3B',
-			unknown: '#8E8E8E'
-		};
-		const statusLabels: Record<string, string> = {
-			in: 'במלאי',
-			few: 'חלקי',
-			out: 'אין',
-			unknown: '?'
-		};
-
 		const drugRows = drugs
 			.map((d) => {
 				const status = drugStockStatus(p, d.largo_code);
-				const color = statusColors[status];
-				const label = statusLabels[status];
+				const color = STOCK_COLORS[status];
+				const label = popupLabels[status];
 				return `<div class="popup-drug-row">
 					<div class="popup-drug-name" dir="ltr">${esc(d.name)}</div>
 					<div class="popup-drug-status">
@@ -123,7 +117,7 @@
 			})
 			.join('');
 
-		return `<div class="popup-wrap" dir="rtl">
+		return `<div class="popup-wrap" dir="rtl" lang="he">
 			<div class="popup-name">${esc(p.name)}</div>
 			<div class="popup-addr">${esc(addr)}</div>
 			${phone}
@@ -158,7 +152,7 @@
 	}
 	:global(.popup-wrap .popup-addr) {
 		font-size: 0.8rem;
-		color: #6b6b6b;
+		color: #555555;
 		margin-bottom: 4px;
 		text-align: right;
 	}

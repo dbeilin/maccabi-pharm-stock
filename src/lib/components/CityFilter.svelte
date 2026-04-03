@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	let {
 		selectedCities = [],
 		availableCities = [],
@@ -36,18 +34,17 @@
 			open = false;
 		}
 	}
-
-	onMount(() => {
-		document.addEventListener('click', handleClickOutside);
-		return () => document.removeEventListener('click', handleClickOutside);
-	});
 </script>
+
+<svelte:document onclick={handleClickOutside} />
 
 <div class="city-filter" bind:this={container}>
 	<button
 		class="city-trigger"
 		type="button"
 		onclick={() => (open = !open)}
+		aria-label="סנן לפי עיר"
+		aria-expanded={open}
 	>
 		<span class="city-trigger-text">
 			{selectedCities.length === 0
@@ -57,12 +54,12 @@
 					: `${selectedCities.length} ערים נבחרו`}
 		</span>
 		<svg
-			class="chevron"
-			class:rotated={open}
+			class="chevron {open ? 'rotated' : ''}"
 			viewBox="0 0 20 20"
 			width="16"
 			height="16"
 			fill="currentColor"
+			aria-hidden="true"
 		>
 			<path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
 		</svg>
@@ -75,13 +72,14 @@
 	{/if}
 
 	{#if open}
-		<div class="city-dropdown">
+		<div class="city-dropdown glass-panel dropdown-enter">
 			<input
 				type="text"
 				class="city-search"
 				placeholder="חפש עיר..."
 				bind:value={search}
 				autocomplete="off"
+				inputmode="search"
 			/>
 			{#if availableCities.length > 0}
 				<div class="select-all-row">
@@ -131,6 +129,7 @@
 		align-items: center;
 		gap: 6px;
 		padding: 8px 14px;
+		min-height: var(--min-touch);
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -138,7 +137,7 @@
 		font-size: 0.88rem;
 		color: var(--color-text);
 		border-radius: var(--radius-sm);
-		transition: background 0.15s;
+		transition: background var(--transition-fast);
 	}
 
 	.city-trigger:hover {
@@ -162,15 +161,15 @@
 		background: rgba(196, 91, 40, 0.15);
 		border: none;
 		color: var(--color-accent);
-		width: 22px;
-		height: 22px;
+		width: 32px;
+		height: 32px;
 		border-radius: 50%;
-		font-size: 0.85rem;
+		font-size: 0.95rem;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: background 0.15s;
+		transition: background var(--transition-fast);
 	}
 
 	.clear-badge:hover {
@@ -183,14 +182,8 @@
 		right: 0;
 		min-width: 240px;
 		max-width: 320px;
-		background: rgba(255, 252, 245, 0.95);
-		backdrop-filter: var(--glass-blur);
-		-webkit-backdrop-filter: var(--glass-blur);
-		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
-		box-shadow: var(--shadow-elevated);
 		z-index: 9998;
-		animation: dropdown-in 0.15s ease-out;
 		overflow: hidden;
 	}
 
@@ -246,9 +239,10 @@
 		align-items: center;
 		gap: 10px;
 		padding: 8px 14px;
+		min-height: var(--min-touch);
 		cursor: pointer;
 		font-size: 0.86rem;
-		transition: background 0.12s;
+		transition: background var(--transition-fast);
 	}
 
 	.city-option:hover {
@@ -279,14 +273,4 @@
 		font-size: 0.84rem;
 	}
 
-	@keyframes dropdown-in {
-		from {
-			opacity: 0;
-			transform: translateY(-4px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Pharmacy, Drug, StockStatus } from '$lib/types/pharmacy';
-	import { drugStockStatus } from '$lib/utils/normalize';
+	import { drugStockStatus, STOCK_LABELS } from '$lib/utils/normalize';
 
 	let {
 		pharmacy,
@@ -17,10 +17,10 @@
 	} = $props();
 
 	const statusMeta: Record<StockStatus, { cls: string; label: string }> = {
-		in: { cls: 'dot-in', label: 'במלאי' },
-		few: { cls: 'dot-few', label: 'מלאי חלקי' },
-		out: { cls: 'dot-out', label: 'אין במלאי' },
-		unknown: { cls: 'dot-unknown', label: 'לא ידוע' }
+		in: { cls: 'dot-in', label: STOCK_LABELS.in },
+		few: { cls: 'dot-few', label: STOCK_LABELS.few },
+		out: { cls: 'dot-out', label: STOCK_LABELS.out },
+		unknown: { cls: 'dot-unknown', label: STOCK_LABELS.unknown }
 	};
 </script>
 
@@ -63,7 +63,7 @@
 		padding: 12px 14px;
 		border-bottom: 1px solid var(--color-border);
 		cursor: pointer;
-		transition: background 0.15s;
+		transition: background var(--transition-fast);
 		border-left: 3px solid transparent;
 	}
 
@@ -154,7 +154,7 @@
 	}
 	.drug-status.few {
 		background: rgba(212, 147, 13, 0.12);
-		color: var(--color-stock-few);
+		color: var(--color-stock-few-text);
 	}
 	.drug-status.out {
 		background: rgba(201, 59, 59, 0.12);

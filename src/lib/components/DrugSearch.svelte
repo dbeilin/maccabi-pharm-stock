@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { Drug } from '$lib/types/pharmacy';
 	import type { CatalogItem } from '$lib/types/pharmacy';
 	import { searchCatalog } from '$lib/api/catalog';
-	import { esc } from '$lib/utils/esc';
 
 	let {
 		selectedDrugs = [],
@@ -22,6 +20,7 @@
 	let acTimer: ReturnType<typeof setTimeout>;
 	let drugInput: HTMLInputElement;
 	let drugBox: HTMLDivElement;
+	let acListId = 'drug-ac-list';
 
 	const filteredAcItems = $derived(
 		acItems.filter(
@@ -82,12 +81,9 @@
 			acOpen = false;
 		}
 	}
-
-	onMount(() => {
-		document.addEventListener('click', handleClickOutside);
-		return () => document.removeEventListener('click', handleClickOutside);
-	});
 </script>
+
+<svelte:document onclick={handleClickOutside} />
 
 <div class="drug-search" bind:this={drugBox}>
 	<div class="drug-tags">
@@ -107,12 +103,21 @@
 			onkeydown={onKeyDown}
 			placeholder={selectedDrugs.length ? 'הוסף עוד...' : 'הקלד שם תרופה...'}
 			autocomplete="off"
+			inputmode="search"
+			enterkeyhint="search"
+			role="combobox"
+			aria-expanded={acOpen}
+			aria-autocomplete="list"
+			aria-controls={acListId}
+			aria-activedescendant={acOpen && filteredAcItems.length > 0 ? `drug-ac-${acSelectedIndex}` : undefined}
+			aria-label="חיפוש תרופה"
 		/>
 		{#if acOpen && filteredAcItems.length > 0}
-			<div class="autocomplete-list">
+			<div class="autocomplete-list glass-panel dropdown-enter" id={acListId} role="listbox">
 				{#each filteredAcItems as item, i}
 					<button
 						type="button"
+						id="drug-ac-{i}"
 						class="ac-item {i === acSelectedIndex ? 'selected' : ''}"
 						onclick={() => selectDrug(item)}
 						role="option"
@@ -163,9 +168,16 @@
 		color: var(--color-primary);
 		font-size: 1.05rem;
 		line-height: 1;
-		padding: 0 0 0 2px;
+		min-width: 28px;
+		min-height: 28px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		margin: -4px -6px -4px 0;
 		opacity: 0.6;
-		transition: opacity 0.15s;
+		transition: opacity var(--transition-fast);
+		border-radius: 50%;
 	}
 
 	.drug-tag button:hover {
@@ -194,16 +206,10 @@
 		top: calc(100% + 6px);
 		right: 0;
 		left: 0;
-		background: rgba(255, 252, 245, 0.95);
-		backdrop-filter: var(--glass-blur);
-		-webkit-backdrop-filter: var(--glass-blur);
-		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		max-height: 240px;
 		overflow-y: auto;
 		z-index: 9999;
-		box-shadow: var(--shadow-elevated);
-		animation: dropdown-in 0.15s ease-out;
 	}
 
 	.ac-item {
@@ -214,9 +220,10 @@
 		border: none;
 		font-family: var(--font-body);
 		padding: 10px 14px;
+		min-height: var(--min-touch);
 		cursor: pointer;
 		font-size: 0.88rem;
-		transition: background 0.12s;
+		transition: background var(--transition-fast);
 		color: var(--color-text);
 	}
 
@@ -241,14 +248,4 @@
 		}
 	}
 
-	@keyframes dropdown-in {
-		from {
-			opacity: 0;
-			transform: translateY(-4px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
 </style>
