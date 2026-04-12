@@ -16,7 +16,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
-      - run: bun install --frozen-lockfile
+      - run: bun install
 
       - name: Fetch cities
         run: bun run scripts/fetch-cities.ts
