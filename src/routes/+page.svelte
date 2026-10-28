@@ -128,8 +128,21 @@
 			activeIndex = -1;
 			viewMode = 'list';
 
+			// Selected cities the API returned nothing for (e.g. the drug isn't tracked there)
+			const foundCodes = new Set(results.map((p) => p.cityCode));
+			const emptyCities = selectedCityNames.filter((name) => {
+				const code = getCityCode(name);
+				return code && !foundCodes.has(code);
+			});
+			const emptyNote =
+				emptyCities.length === 0
+					? ''
+					: emptyCities.length <= 5
+						? ` | אין נתונים עבור: ${emptyCities.join(', ')}`
+						: ` | אין נתונים עבור ${emptyCities.length} מהערים שנבחרו`;
+
 			status = {
-				message: `נמצאו ${results.length} בתי מרקחת | תרופות: ${selectedDrugs.map((d) => d.name).join(', ')}`,
+				message: `נמצאו ${results.length} בתי מרקחת | תרופות: ${selectedDrugs.map((d) => d.name).join(', ')}${emptyNote}`,
 				type: 'ok'
 			};
 		} catch (e: unknown) {

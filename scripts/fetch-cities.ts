@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -8,6 +8,9 @@ const __dirname = dirname(__filename);
 const BASE = 'https://serguide.maccabi4u.co.il';
 const SEARCH_URL = BASE + '/webapi/api/SearchPage/GetSearchPageSearch/';
 const CATALOG_URL = BASE + '/Api/api/mac_pharmacy/v1/medications/catalog';
+
+// A new list smaller than this fraction of the current one is treated as a failed fetch
+const MIN_KEEP_RATIO = 0.8;
 
 const BROWSER_HEADERS = {
 	'Content-Type': 'application/json',
@@ -115,6 +118,18 @@ async function main() {
 	console.log(`\nTotal: ${cities.length} cities, ${seenIds.size} unique pharmacies`);
 
 	const outPath = join(__dirname, '..', 'src', 'lib', 'data', 'cities.json');
+
+	// Refuse to overwrite the list with a much smaller one (e.g. when the API blocks or fails)
+	let existingCount = 0;
+	try {
+		existingCount = JSON.parse(readFileSync(outPath, 'utf-8')).length;
+	} catch {}
+	if (cities.length === 0 || cities.length < existingCount * MIN_KEEP_RATIO) {
+		throw new Error(
+			`Got ${cities.length} cities, existing list has ${existingCount}; not overwriting`
+		);
+	}
+
 	writeFileSync(outPath, JSON.stringify(cities, null, 2), 'utf-8');
 	console.log(`Written to ${outPath}`);
 }
